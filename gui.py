@@ -12,8 +12,9 @@ from pathlib import Path
 
 # Explicit imports to satisfy Flake8
 
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Label, StringVar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
 import customtkinter
+import re
 
 
 
@@ -28,16 +29,6 @@ def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
 
-
-def on_sign_in():
-    
-    window.destroy()
-    import gui1
-    gui1.window
-
-
-
-
 window = Tk()
 
 
@@ -47,6 +38,52 @@ window.configure(bg = "#FFFFFF")
 
 
 entry_font = customtkinter.CTkFont(family="Arial", size=16)
+
+
+
+username_error_message = StringVar()  # String variable for username error
+password_error_message = StringVar()  # String variable for password error
+
+
+def register():
+
+    # get information
+    username = username_entry.get()
+    password = password_entry.get()
+
+    username_error = ""
+    password_error = ""
+
+    # validate username
+    if len(username) == 0 or len(password) == 0: 
+        username_error = "Username cannot be empty."
+        password_error = "Password cannot be empty."
+        return
+    if len(password) < 8:
+        password_error = "Password must contains at least 8 characters"
+    # store information (add your logic here)
+    # window.destroy()
+    # import gui1
+    # gui1.window
+    username_error_message.set(username_error)  # Update error message variables
+    password_error_message.set(password_error)
+
+
+    if username_error or password_error:  # Check for any errors
+        return  # Exit function if there are errors
+
+
+def popup_screen(message = ''):
+   top= Toplevel(window)
+   top.geometry("550x250")
+   top.title("Invalid input")
+   top.configure(bg="#FFFFFF")
+   
+   # Center the popup window
+   top.geometry("+%d+%d" % (window.winfo_screenwidth() // 2 - 375, window.winfo_screenheight() // 2 - 175))
+
+   Label(top, text= message, font=('Arial 18 bold'), background="#FFFFFF").place(x=125,y=100)
+
 
 
 
@@ -125,8 +162,6 @@ username_entry = customtkinter.CTkEntry(
 
 )  
 
-
-
 username_entry.place(
 
     x=293.0,
@@ -134,16 +169,21 @@ username_entry.place(
     y=262.0,
 
 )
-# image_image_2 = PhotoImage(
-#     file=relative_to_assets("image_2.png"))
-# image_2 = canvas.create_image(
-#     768.0,
-#     395.0,
-#     image=image_image_2
-# )
 
-# icon_button = customtkinter.CTkButton(master= window, image=image_image_2, text="", command=(print('click'))) 
 
+username_error_label = Label(
+
+    window, 
+    textvariable=username_error_message, 
+    fg="red", 
+    font=("Arial", 10)
+)
+username_error_label.place(x=293, y=330)  # Adjust placement as needed
+
+
+
+password = StringVar()  #Password variable
+bullet = "\u2022"       #specifies bullet character
 
 password_entry = customtkinter.CTkEntry(
 
@@ -161,8 +201,13 @@ password_entry = customtkinter.CTkEntry(
 
     height=64,
 
-    width=440
+    width=440, 
 
+    textvariable=password, 
+
+    show=bullet, 
+
+  
 )
 
 
@@ -175,6 +220,39 @@ password_entry.place(
 
 )
 
+password_error_label = Label(
+    window, textvariable=password_error_message, fg="red", font=("Arial", 10)
+)
+password_error_label.place(x=293, y=440)  # Adjust placement as needed
+
+
+
+
+
+# def show_message(error='',  color ='black'):
+#     error_label = None  # Access the global variable
+
+#     if error_label is None:  # Create the label if it doesn't exist
+#         error_label = customtkinter.CTkLabel(
+#             window, text=error, fg=color, font=("Arial", 12), 
+#         )
+#         error_label.place(x=293, y=295)  # Adjust placement as needed
+#     else:
+#         error_label.config(text=error, fg=color)  # Update existing label
+
+
+# def validate(username):
+#     """
+#     Checks if the username contains only alphanumeric characters and underscores.
+#     """
+#     pattern = r"^[a-zA-Z0-9_]+$"
+#     return bool(re.fullmatch(pattern, username))
+
+# def on_invalid(validate):
+#     """
+#     Shows the error message if the username is invalid.
+#     """
+#     show_message( 'Username can only contain letters, numbers, and underscores.', 'red')
 
 
 
@@ -190,7 +268,7 @@ button_submit = Button(
 
     highlightthickness=0,
 
-    command=on_sign_in,
+    command=register,
 
     relief="flat"
 
