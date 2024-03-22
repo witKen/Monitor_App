@@ -16,7 +16,7 @@ from models.product_model import Product
 # from featurea.product.widgets.drink_tile import DrinkTile
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/home/arrowdot/Documents/Monitor_App/assets/frame1")
+ASSETS_PATH = OUTPUT_PATH / Path(r"./assets/frame1")
 
 
 def relative_to_assets(path: str) -> Path:
