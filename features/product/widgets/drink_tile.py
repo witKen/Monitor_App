@@ -3,9 +3,8 @@ from tkinter import Label
 from PIL import Image, ImageTk
 import requests
 from io import BytesIO
-import screens.product_menu_page 
 
-class DrinkTile(tk.TopLevel):
+class DrinkTile(tk.Frame):
     def __init__(self, parent, drink_id,drink_flavour, drink_price, drink_description, drink_image):
         super().__init__(parent, bg="white", borderwidth=2, highlightbackground="red", highlightthickness=1)
         self.drink_id = drink_id
@@ -20,7 +19,11 @@ class DrinkTile(tk.TopLevel):
         # Bind left mouse button click event to the show_product_detail method
         self.bind("<Button-1>", self.show_product_detail)
 
-
+    def load_image_from_url(self, url):
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((100, 100), Image.ADAPTIVE)
+        return ImageTk.PhotoImage(img)
 
     def create_widgets(self):
         # Load drink image from Cloudinary URL

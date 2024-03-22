@@ -6,17 +6,18 @@ from pathlib import Path
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
+from tkinter import Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame
 import customtkinter
 import asyncio
 from constants.global_variable import *
 from features.product.services.product_services import ProductServices
 from features.product.services.order_services import OrderServices
+from features.product.widgets.drink_tile import DrinkTile
 from models.product_model import Product
 # from featurea.product.widgets.drink_tile import DrinkTile
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"./assets/frame1")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/home/arrowdot/Documents/Monitor_App/assets/frame1")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -57,9 +58,8 @@ async def create_drink_menu():
         font=("Niradei Bold", 32 * -1)
     )
 
-    image_image_1 = PhotoImage(
-    file=relative_to_assets("image_1.png"))
-    image_1 = canvas.create_image(
+    image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
+    canvas.create_image(
         108.0,
         49.0,
         image=image_image_1
@@ -84,22 +84,35 @@ async def create_drink_menu():
             price=drink_data["price"],
             image_url=drink_data["image"]
         )
+
+        frame = drinks_frame
+        frame.grid(row=i, column=0, padx=10, pady=10)
+
+        DrinkTile(
+            parent=frame, 
+            drink_id = drink.id,
+            drink_flavour=drink.name,
+            drink_price=drink.price,
+            drink_description=drink.description,
+            drink_image=drink.image_url
+        )
+
     # scroll_frame = customtkinter.CTkScrollbar(master=window, )
-    button_image_1 = PhotoImage(
-        file=relative_to_assets("button_1.png"))
-    button_1 = Button(
-        image=button_image_1,
-        borderwidth=0,
-        highlightthickness=0,
-        command=lambda: print("button_1 clicked"),
-        relief="flat"
-    )
-    button_1.place(
-        x=44.0,
-        y=211.0,
-        width=185.10841369628906,
-        height=235.8418426513672
-    )
+        # button_image_1 = PhotoImage(
+        #     file=relative_to_assets("button_1.png"))
+        # button_1 = Button(
+        #     image=button_image_1,
+        #     borderwidth=0,
+        #     highlightthickness=0,
+        #     command=lambda: print("button_1 clicked"),
+        #     relief="flat"
+        # )
+        # button_1.place(
+        #     x=44.0,
+        #     y=211.0,
+        #     width=185.10841369628906,
+        #     height=235.8418426513672
+        # )
 
 # button_image_2 = PhotoImage(
 #     file=relative_to_assets("button_2.png"))
@@ -173,14 +186,16 @@ async def create_drink_menu():
 #     fill="#FFFFFF",
 #     outline="")
 
-
+drinks_frame = Frame(window, bg="white")
+drinks_frame.pack(pady=10)
 
 # Create drink widgets asynchronously
 loop = asyncio.get_event_loop()       
 loop.run_until_complete(create_drink_menu())
 
+
 # Create drinks frame
-drinks_frame = window
+drinks_frame = Frame(window)
 drinks_frame.pack(pady=10)
 window.resizable(False, False)
 window.mainloop()
