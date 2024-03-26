@@ -5,7 +5,7 @@ from pathlib import Path
 # from tkinter import *
 # Explicit imports to satisfy Flake8
 from tkinter import Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame, Label
-import customtkinter
+from customtkinter import *
 import asyncio
 from constants.global_variable import *
 from features.product.services.product_services import ProductServices
@@ -25,53 +25,69 @@ window.geometry("1024x720")
 # screen_height = window.winfo_screenheight()
 # window.geometry(f"{screen_width}x{screen_height}+0+0")
 window.configure(bg = "#FFFFFF")
-# Create drinks frame
-drinks_frame = Frame(window, bg="black")
-drinks_frame.pack(pady=10)
 
-screen_width = window.winfo_screenwidth()
-canvas = Canvas(
-window,
-bg = "#FFFFFF",
-height = 200,
-width = screen_width,
-bd = 0,
-highlightthickness = 0,
-relief = "ridge"
-)
-canvas.place(x = 0, y = 0)
-canvas.create_text(
-    64.0,
-    117.0,
-    anchor="nw",
-    text="Choose your drink",
-    fill="#11284C",
-    font=("Niradei Bold", 32 * -1)
-)
-image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
-canvas.create_image(
-    108.0,
-    49.0,
-    image=image_image_1
-)
-canvas.create_text(
-    164.3662109375,
-    37.4525146484375,
-    anchor="nw",
-    text="Robot Cafe",
-    fill="#11284C",
-    font=("CADTMonoDisplay Regular", 32 * -1)
-)
+# screen_width = window.winfo_screenwidth()
+# canvas = Canvas(
+#     window,
+#     bg = "#FFFFFF",
+#     height = 200,
+#     width = screen_width,
+#     bd = 0,
+#     highlightthickness = 0,
+#     relief = "ridge"
+# )
+# canvas.place(x = 0, y = 0)
+# canvas.create_text(
+#     64.0,
+#     117.0,
+#     anchor="nw",
+#     text="Choose your drink",
+#     fill="#11284C",
+#     font=("Niradei Bold", 32 * -1)
+# )
+# image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
+# canvas.create_image(
+#     108.0,
+#     49.0,
+#     image=image_image_1
+# )
+# canvas.create_text(
+#     164.3662109375,
+#     37.4525146484375,
+#     anchor="nw",
+#     text="Robot Cafe",
+#     fill="#11284C",
+#     font=("CADTMonoDisplay Regular", 32 * -1)
+# )
 # # Scrolling setup
-# canvas = Canvas(window, bg="white")
-# scrollbar = Scrollbar(window, orient="vertical", command=canvas.yview)
+canvas1 = Canvas(window, bg="white")
+canvas1.pack(side="left", fill="both", expand=True)
+scrollable_frame = Frame(canvas1, bg="white", width=720) # Adjust width as needed
+scrollable_frame.bind( # Configure for dynamic scroll region
+       "<Configure>",
+       lambda e: canvas1.configure(
+           scrollregion=canvas1.bbox("all")
+       )
+   )
 # canvas.configure(yscrollcommand=scrollbar.set)
+# Create drinks frame
+drinks_frame = Frame(scrollable_frame, bg="yellow")
+drinks_frame.pack(pady=10, padx=10, side="left")
+
+scrollbar = Scrollbar(window, orient="vertical", command=canvas1.yview)
+scrollbar.pack(side="right", fill="y")
+canvas1.configure(yscrollcommand=scrollbar.set)
+canvas1.create_window(0, 0, window=scrollable_frame, anchor='nw') 
+
 async def create_drink_menu():
     
     loading_label = Label(drinks_frame, text="Loading...")
     loading_label.grid(row=0, column=0)
     product_data = await ProductServices.fetch_coffee_data_async()
     loading_label.destroy()
+
+    row = 0
+    column = 0
     for i, drink_data in enumerate(product_data):
         drink = Product(
             id = drink_data["_id"],
@@ -80,8 +96,9 @@ async def create_drink_menu():
             price=drink_data["price"],
             image_url=drink_data["image"]
         )
-        frame = drinks_frame
-        frame.grid(row=i, column=0, padx=64, pady=210)
+        frame = Frame(drinks_frame, background="white") 
+        frame.grid(row=row, column=column, padx=0, pady=210, sticky="w")
+        
         DrinkTile(
             parent=frame, 
             drink_id = drink.id,
@@ -90,7 +107,15 @@ async def create_drink_menu():
             drink_description=drink.description,
             drink_image=drink.image_url
         )
+        
+        
+        column += 1
+        if column == 4:  # Or some other number of columns you prefer
+            row += 1
+            column = 0
         print(drink.image_url)
+        print("row:" + str(row) + " " + "Column: " + str(column) )
+        
         
 
     # scroll_frame = customtkinter.CTkScrollbar(master=window, )

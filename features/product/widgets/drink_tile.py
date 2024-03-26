@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 import requests
 from io import BytesIO
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH.parent.parent.parent / "assets/frame0"
+ASSETS_PATH = OUTPUT_PATH.parent.parent.parent / "assets/frame1"
 # ASSETS_PATH = OUTPUT_PATH / Path(r"Monitor_App/assets/frame1")
 
 def relative_to_assets(path: str) -> Path:
@@ -21,20 +21,26 @@ class DrinkTile(tk.Frame):
         self.drink_description = drink_description
         self.drink_image = drink_image
         self.create_widgets()
-        self.pack()
+        self.pack(padx = 10, pady=10)
         
         # Bind left mouse button click event to the show_product_detail method
         # self.bind("<Button-1>", self.show_product_detail)
     def load_image_from_url(self, url):
         response = requests.get(url)
         img = Image.open(BytesIO(response.content))
-        img = img.resize((100, 100), Image.ADAPTIVE)
+        img = img.resize((171, 171), Image.ADAPTIVE)
         
         return ImageTk.PhotoImage(img)
     
     def create_widgets(self):
+        # asset = relative_to_assets("Button.png")
         # button_image_1 = PhotoImage(
-        #     file=relative_to_assets("button_1.png"))
+        #     file=relative_to_assets("Button.png"))
+        # # photo = PhotoImage(button_image_1)
+        # background = Label(self, image=button_image_1)
+        # background.place(x=0, y=0, relwidth=1, relheight=1)
+        # print (asset)
+        
         # button_1 = Button(
         #     image=button_image_1,
         #     borderwidth=0,
@@ -50,15 +56,15 @@ class DrinkTile(tk.Frame):
         # )
         # Load drink image from Cloudinary URL
         image = self.load_image_from_url(self.drink_image)
-        image_label = Label(self, image=image, width=100, height=100)
+        image_label = Label(self, image=image, width=171, height=171, background="white")
         image_label.image = image
-        image_label.grid(row=0, column=0, rowspan=2, padx=12, pady=12)
+        image_label.grid(row=0, column=0, rowspan=2, padx=8, pady=8)
         # image_label.bind("<Button-1>", self.show_product_detail)
-        flavour_label = Label(self, text=self.drink_flavour, font=('Helvetica', 15),bg="white", padx=12)
-        flavour_label.grid(row=0, column=1, sticky=tk.W)
+        flavour_label = Label(self, text=self.drink_flavour, font=('Helvetica', 15),bg="white", padx=8)
+        flavour_label.grid(row=2, column=0, sticky=tk.W)
         # flavour_label.bind("<Button-1>", self.show_product_detail)
-        price_label = Label(self, text=f"${self.drink_price:.2f}", font=('Helvetica', 20), bg="white", padx=12)
-        price_label.grid(row=1, column=1, sticky=tk.W)
+        price_label = Label(self, text=f"${self.drink_price:.2f}", font=('Helvetica', 20), bg="white", padx=8)
+        price_label.grid(row=3, column=0, sticky=tk.W)
         
         # price_label.bind("<Button-1>", self.show_product_detail)
     
