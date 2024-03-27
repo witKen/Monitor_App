@@ -5,6 +5,8 @@ from tkinter import Button, Label, PhotoImage
 from PIL import Image, ImageTk
 import requests
 from io import BytesIO
+
+from features.product.screens.item_detail_page import ItemDetailPage
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH.parent.parent.parent / "assets/frame1"
 # ASSETS_PATH = OUTPUT_PATH / Path(r"Monitor_App/assets/frame1")
@@ -13,7 +15,7 @@ def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
 class DrinkTile(tk.Frame):
-    def __init__(self, parent, drink_id,drink_flavour, drink_price, drink_description, drink_image):
+    def __init__(self, parent, drink_id, drink_flavour, drink_price, drink_description, drink_image):
         super().__init__(parent, bg="white", borderwidth=2, highlightbackground="red", highlightthickness=1)
         self.drink_id = drink_id
         self.drink_flavour = drink_flavour
@@ -24,7 +26,7 @@ class DrinkTile(tk.Frame):
         self.pack(padx = 10, pady=10)
         
         # Bind left mouse button click event to the show_product_detail method
-        # self.bind("<Button-1>", self.show_product_detail)
+        self.bind("<Button-1>", self.show_product_detail)
     def load_image_from_url(self, url):
         response = requests.get(url)
         img = Image.open(BytesIO(response.content))
@@ -33,27 +35,7 @@ class DrinkTile(tk.Frame):
         return ImageTk.PhotoImage(img)
     
     def create_widgets(self):
-        # asset = relative_to_assets("Button.png")
-        # button_image_1 = PhotoImage(
-        #     file=relative_to_assets("Button.png"))
-        # # photo = PhotoImage(button_image_1)
-        # background = Label(self, image=button_image_1)
-        # background.place(x=0, y=0, relwidth=1, relheight=1)
-        # print (asset)
         
-        # button_1 = Button(
-        #     image=button_image_1,
-        #     borderwidth=0,
-        #     highlightthickness=0,
-        #     command=lambda: print("button_1 clicked"),
-        #     relief="flat"
-        # )
-        # button_1.place(
-        #     x=44.0,
-        #     y=211.0,
-        #     width=185.10841369628906,
-        #     height=235.8418426513672
-        # )
         # Load drink image from Cloudinary URL
         image = self.load_image_from_url(self.drink_image)
         image_label = Label(self, image=image, width=171, height=171, background="white")
@@ -65,9 +47,8 @@ class DrinkTile(tk.Frame):
         # flavour_label.bind("<Button-1>", self.show_product_detail)
         price_label = Label(self, text=f"${self.drink_price:.2f}", font=('Helvetica', 20), bg="white", padx=8)
         price_label.grid(row=3, column=0, sticky=tk.W)
-        
-        # price_label.bind("<Button-1>", self.show_product_detail)
+        price_label.bind("<Button-1>", self.show_product_detail)
     
-    # def show_product_detail(self, event):
-    #     print("product")
-    # ProductDetailScreen(self.master,self.drink_id ,self.drink_flavour, self.drink_price, self.drink_description, self.drink_image)
+    def show_product_detail(self, event):
+        print("product")
+        ItemDetailPage(self.master, self.drink_id ,self.drink_flavour, self.drink_price, self.drink_description, self.drink_image)
