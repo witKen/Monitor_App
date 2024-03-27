@@ -32,11 +32,6 @@ ASSETS_PATH1 = OUTPUT_PATH1.parent.parent.parent / "assets/frame1"
 def relative_to_assets1(path: str) -> Path:
     return ASSETS_PATH1 / Path(path)
 
-OUTPUT_PATH2 = Path(__file__).parent
-ASSETS_PATH2 = OUTPUT_PATH2.parent.parent.parent / "assets/frame2"
-
-def relative_to_assets2(path: str) -> Path:
-    return ASSETS_PATH2 / Path(path)
 
 window = Tk()
 window.geometry("1024x720")

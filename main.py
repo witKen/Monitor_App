@@ -18,10 +18,16 @@ import re
 
 OUTPUT_PATH = Path(__file__).parent
 
-ASSETS_PATH = OUTPUT_PATH / Path(r"./assets/frame0")
+ASSETS_PATH = OUTPUT_PATH / Path("assets/frame0")
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
+
+OUTPUT_PATH2 = Path(__file__).parent
+ASSETS_PATH2 = OUTPUT_PATH2.parent.parent.parent / "assets/frame2"
+
+def relative_to_assets2(path: str) -> Path:
+    return ASSETS_PATH2 / Path(path)
 
 #frame setup
 window = Tk()

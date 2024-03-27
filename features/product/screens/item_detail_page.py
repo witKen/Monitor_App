@@ -3,11 +3,15 @@
 # https://github.com/ParthJadhav/Tkinter-Designer
 
 
+from io import BytesIO
 from pathlib import Path
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Label, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame
+from tkinter import NW,  Label, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame
+# from tkinter.tix import IMAGETEXT
+from PIL import Image, ImageTk
+import requests
 
 
 
@@ -16,6 +20,8 @@ ASSETS_PATH2 = OUTPUT_PATH2.parent.parent.parent / "assets/frame2"
 
 def relative_to_assets2(path: str) -> Path:
     return ASSETS_PATH2 / Path(path)
+
+
 
 
 class ItemDetailPage(Frame):
@@ -36,7 +42,11 @@ class ItemDetailPage(Frame):
         
         # self.geometry("1024x720")
         # self.configure(bg = "#FFFFFF")
-
+        def load_image_from_url(url):
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((171, 171), Image.ADAPTIVE)
+            return ImageTk.PhotoImage(img)
         canvas = Canvas(
             parent,
             bg = "#FFFFFF",
@@ -46,8 +56,7 @@ class ItemDetailPage(Frame):
         )
         
         canvas.pack(fill="both", expand=True)
-        print(canvas.winfo_width())
-        print(canvas.winfo_height())
+        
         canvas.create_rectangle(
             0.0,
             0.0,
@@ -55,9 +64,15 @@ class ItemDetailPage(Frame):
             600,
             fill="#FF4438",
         )
+
+        ################# Title ##############
         title = "Green Tea"
         title_text = Label(canvas, foreground="#FFFFFF", background="#FF4438",font=('Arial', 18), text=title, justify="center")
         title_text.pack(pady=10, side="top", anchor="center")
+        image = load_image_from_url(drink_image) 
+        image_label = Label(canvas, image=image, width=171, height=171, background="white")
+        image_label.image = image
+        image_label.pack(pady= 100, anchor="center")
         # title_text.configure(justify="center")
         # canvas.create_text(
         #     333.0,
@@ -68,11 +83,14 @@ class ItemDetailPage(Frame):
         #     font=("CADTMonoDisplay Regular", 48 * -1)
         # )
 
+        
+      
         image_image_1 = PhotoImage(
             file=relative_to_assets2("image_1.png"))
         image_1 = canvas.create_image(
             511.0,
             280.0,
+            anchor=NW,
             image=image_image_1
         )
 
@@ -89,7 +107,7 @@ class ItemDetailPage(Frame):
             file=relative_to_assets2("button_1.png")
         )
         button_1 = Button(
-            parent,
+            self,
             image=button_image_1,
             borderwidth=0,
             highlightthickness=0,
