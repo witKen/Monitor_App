@@ -26,7 +26,7 @@ def relative_to_assets2(path: str) -> Path:
 
 class ItemDetailPage(Frame):
     def __init__(self, parent, drink_id, drink_flavour, drink_price, drink_description, drink_image):
-        super().__init__(parent, background="white")
+        super().__init__(parent)
         
         self.drink_id = drink_id
         self.drink_flavour = drink_flavour
@@ -34,7 +34,7 @@ class ItemDetailPage(Frame):
         self.drink_description = drink_description
         self.drink_image = drink_image
         self.quantity = 1
-
+        self.pack()
         # Set main window to maximum screen
         # screen_width = self.winfo_screenwidth()
         # screen_height = self.winfo_screenheight()
@@ -42,11 +42,11 @@ class ItemDetailPage(Frame):
         
         # self.geometry("1024x720")
         # self.configure(bg = "#FFFFFF")
-        def load_image_from_url(url):
-            response = requests.get(url)
-            img = Image.open(BytesIO(response.content))
-            img = img.resize((171, 171), Image.ADAPTIVE)
-            return ImageTk.PhotoImage(img)
+        # root = Tk()
+        # canvas1 = Canvas(root)
+        # canvas1.pack()
+        
+
         canvas = Canvas(
             parent,
             bg = "#FFFFFF",
@@ -61,18 +61,48 @@ class ItemDetailPage(Frame):
             0.0,
             0.0,
             1024.0,
-            600,
+            560,
             fill="#FF4438",
         )
 
         ################# Title ##############
-        title = "Green Tea"
-        title_text = Label(canvas, foreground="#FFFFFF", background="#FF4438",font=('Arial', 18), text=title, justify="center")
-        title_text.pack(pady=10, side="top", anchor="center")
+        title = f"{self.drink_flavour}"
+        title_text = Label(canvas, foreground="#FFFFFF", background="#FF4438",font=('Arial', 32), text=title, justify="center")
+        title_text.pack(pady=50, side="top", anchor="center")
+        
+        
+        def load_image_from_url(url):
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((250, 250), Image.ADAPTIVE)
+            return ImageTk.PhotoImage(img)
+        
         image = load_image_from_url(drink_image) 
-        image_label = Label(canvas, image=image, width=171, height=171, background="white")
-        image_label.image = image
-        image_label.pack(pady= 100, anchor="center")
+        # image_logo = Label(canvas, image=image, width=171, height=171, background="green")
+        # image_logo.image = image
+        # image_logo.pack(pady= 100, anchor="center")
+        # image_logo.lift()
+        image_object = PhotoImage(file=relative_to_assets2("image_1.png"))
+        # print(image_object)
+        # image_label = Label(canvas, image=image_object, bg="red")
+        # image_label.image = image_object  # Store reference
+        # image_label.pack(pady=50, expand=False)
+        # image_label.lower()
+
+
+        
+        canvas1 = Canvas(canvas, width=409, height=374)  # Adjust size if needed
+        canvas1.pack() 
+        image_label = Label(canvas1, image=image_object, bg="#FF4438")
+        image_label.image = image_object
+        # image_label.pack()
+        canvas1.create_window(0, 0, window=image_label, anchor="nw")
+        
+        image_logo = Label(canvas1, image=image, width=250, height=250)
+        image_logo.image = image
+        # image_logo.pack()
+        canvas1.create_window(86, 50, window=image_logo, anchor="nw")
+
         # title_text.configure(justify="center")
         # canvas.create_text(
         #     333.0,
@@ -85,48 +115,88 @@ class ItemDetailPage(Frame):
 
         
       
-        image_image_1 = PhotoImage(
-            file=relative_to_assets2("image_1.png"))
-        image_1 = canvas.create_image(
-            511.0,
-            280.0,
-            anchor=NW,
-            image=image_image_1
-        )
+        # image_image_1 = PhotoImage(
+        #     file=relative_to_assets2("image_1.png"))
+        # print(image_image_1)
+        # image_1 = canvas.create_image(
+        #     511.0,
+        #     280.0,
+        #     anchor=NW,
+        #     image=image_image_1
+        # )
 
-        image_image_2 = PhotoImage(
-            file=relative_to_assets2("image_2.png"))
-        image_2 = canvas.create_image(
-            511.0,
-            298.0,
-            image=image_image_2
-        )
-        # Create a debug window
+
+        # image_image_2 = PhotoImage(
+        #     file=relative_to_assets2("image_2.png"))
         
+        # image_2 = canvas.create_image(
+        #     511.0,
+        #     298.0,
+        #     image=image_image_2
+        # )
+        # Create a debug window
+      
+        # canvas2 = Canvas(canvas, bg="purple", width=316, height=66)  # Adjust size if needed
+        # canvas2.pack(pady=50) 
         button_image_1 = PhotoImage(
             file=relative_to_assets2("button_1.png")
         )
         button_1 = Button(
-            self,
+            canvas,
             image=button_image_1,
             borderwidth=0,
             highlightthickness=0,
+            bg="#FF4438",
             command=lambda: print("button_1 clicked"),
             relief="flat"
         )
-        button_1.place(
-            x=354.0,
-            y=600.0,
-            width=316.0545654296875,
-            height=66.37145233154297
+        button_1.image = button_image_1
+        # canvas2.create_window(0, 0, window=button_1, anchor="w")
+        # button_1.place(
+        #     x=354.0,
+        #     y=600.0,
+        #     width=316.0545654296875,
+        #     height=66.37145233154297
+        # )
+        button_1.pack(padx=354, pady=64)
+
+        button_image_2 = PhotoImage(
+            file=relative_to_assets2("button_2.png")
         )
+        button_2 = Button(
+            canvas,
+            image=button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_2 clicked"),
+            relief="flat"
+        )
+        button_2.image = button_image_2
+
+        # button_image_2 = PhotoImage(
+        #     file=relative_to_assets2("button_2.png"))
+        # button_2 = Button(
+        #     canvas,
+        #     image=button_image_2,
+        #     borderwidth=0,
+        #     highlightthickness=0,
+        #     command=lambda: print("button_2 clicked"),
+        #     relief="flat"
+        # )
+        # button_2.image = button_image_2
+        button_2.place(x=86, y=50)
+        # image_label = Label(canvas1, image=button_image_1, bg="#FF4438")
+        # image_label.image = image_object
+        # # image_label.pack()
+        # canvas2.create_window(0, 0, window=image_label, anchor="nw")
         
-        debug_window = Toplevel()
-        label = Label(debug_window, image=button_image_1)
-        label.pack()
-        print(relative_to_assets2("button_1.png"))
+        
+        # debug_window = Toplevel()
+        # label = Label(parent, image=button_image_1)
+        # label.pack()
+        # print(relative_to_assets2("button_1.png"))
         canvas.create_text(
-            46.0,
+            18.0,
             236.0,
             anchor="nw",
             text="Medium Size Drink",
@@ -134,13 +204,23 @@ class ItemDetailPage(Frame):
             font=("Niradei Bold", 28 * -1)
         )
 
-        image_image_3 = PhotoImage(
-            file=relative_to_assets2("image_3.png"))
-        image_3 = canvas.create_image(
-            390.0,
-            260.4375,
-            image=image_image_3
-        )
+        # image_image_3 = PhotoImage(
+        #     file=relative_to_assets2("image_3.png")
+        # )
+        # # canvas_image3 = Canvas(canvas, bg="purple", width=142, height=42)  # Adjust size if needed
+        # # canvas_image3.pack(side="left") 
+        # image_label3 = Label(canvas1, image=image_image_3, bg="#FF4438")
+        # image_label3.image = image_image_3
+        # # image_label.pack()
+        # canvas1.create_window(410, 150, window=image_label3, anchor="ne")
+        
+        # image_image_3 = PhotoImage(
+        #     file=relative_to_assets2("image_3.png"))
+        # image_3 = canvas.create_image(
+        #     390.0,
+        #     260.4375,
+        #     image=image_image_3
+        # )
 
         canvas.create_text(
             716.0,
@@ -150,14 +230,20 @@ class ItemDetailPage(Frame):
             fill="#FFFFFF",
             font=("Niradei Regular", 28 * -1)
         )
+        
+        # image_image_4 = PhotoImage(
+        #     file=relative_to_assets2("image_4.png"))
+        
+        # image_label4 = Label(canvas1, image=image_image_4, bg="#FF4438")
+        # image_label4.image = image_image_4
+        # canvas1.create_window(0, 150, window=image_label4, anchor="nw")
 
-        image_image_4 = PhotoImage(
-            file=relative_to_assets2("image_4.png"))
-        image_4 = canvas.create_image(
-            628.0,
-            274.5,
-            image=image_image_4
-        )
+
+        # image_4 = canvas.create_image(
+        #     628.0,
+        #     274.5,
+        #     image=image_image_4
+        # )
 
         canvas.create_text(
             90.0,
@@ -168,13 +254,19 @@ class ItemDetailPage(Frame):
             font=("Niradei Regular", 28 * -1)
         )
 
-        image_image_5 = PhotoImage(
-            file=relative_to_assets2("image_5.png"))
-        image_5 = canvas.create_image(
-            412.5887451171875,
-            366.32843017578125,
-            image=image_image_5
-        )
+        # image_image_5 = PhotoImage(
+        #     file=relative_to_assets2("image_5.png")
+        # )
+        # image_label5 = Label(canvas1, image=image_image_5, bg="#FF4438")
+        # image_label5.image = image_image_5
+        # canvas1.create_window(410, 320, window=image_label5, anchor="se")
+
+
+        # image_5 = canvas.create_image(
+        #     412.5887451171875,
+        #     366.32843017578125,
+        #     image=image_image_5
+        # )
 
         canvas.create_text(
             723.0,
@@ -185,47 +277,42 @@ class ItemDetailPage(Frame):
             font=("Niradei Bold", 28 * -1)
         )
 
-        image_image_6 = PhotoImage(
-            file=relative_to_assets2("image_6.png"))
-        image_6 = canvas.create_image(
-            631.0,
-            380.1875,
-            image=image_image_6
-        )
+        # image_image_6 = PhotoImage(
+        #     file=relative_to_assets2("image_6.png"))
+        # image_label6 = Label(canvas1, image=image_image_6, bg="#FF4438")
+        # image_label6.image = image_image_6
+        # canvas1.create_window(0, 320, window=image_label6, anchor="sw")
+        # # image_6 = canvas.create_image(
+        #     631.0,
+        #     380.1875,
+        #     image=image_image_6
+        # )
 
-        canvas.create_text(
-            366.0,
-            510.0,
-            anchor="nw",
-            text="Enjoy your drink",
-            fill="#FFFFFF",
-            font=("Niradei Regular", 36 * -1)
-        )
+        # canvas.create_text(
+        #     366.0,
+        #     510.0,
+        #     anchor="nw",
+        #     text="Enjoy your drink",
+        #     fill="#FFFFFF",
+        #     font=("Niradei Regular", 36 * -1)
+        # )
 
-        button_image_2 = PhotoImage(
-            file=relative_to_assets2("button_2.png"))
-        button_2 = Button(
-            parent,
-            image=button_image_2,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: print("button_2 clicked"),
-            relief="flat"
-        )
-        button_2.place(
-            x=86.0,
-            y=50.0,
-            width=45.0,
-            height=47.0
-        )
+       
+        # button_2.place(
+        #     x=86.0,
+        #     y=50.0,
+        #     width=45.0,
+        #     height=47.0
+        # )
 
-        canvas.create_rectangle(
-            843.0,
-            0.0,
-            938.0,
-            123.0,
-            fill="#FF4438",
-            outline="")
+        # canvas.create_rectangle(
+        #     843.0,
+        #     0.0,
+        #     938.0,
+        #     123.0,
+        #     fill="#FF4438",
+        #     outline=""
+        # )
 
         canvas.create_rectangle(
             843.0,
@@ -239,7 +326,7 @@ class ItemDetailPage(Frame):
             865.0,
             38.0,
             anchor="nw",
-            text="2$",
+            text=f"${self.drink_price}",
             fill="#FFFFFF",
             font=("Niradei Bold", 36 * -1)
         )
