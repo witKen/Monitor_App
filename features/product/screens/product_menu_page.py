@@ -6,28 +6,24 @@ from pathlib import Path
 # from tkinter import *
 # Explicit imports to satisfy Flake8
 from tkinter import  Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame, Label
-from customtkinter import *
+import customtkinter
 import asyncio
 from PIL import Image, ImageTk
 
 import requests
-from constants.global_variable import *
 from features.product.screens.item_detail_page import ItemDetailPage
 from features.product.services.product_services import ProductServices
 from features.product.services.order_services import OrderServices
 from features.product.widgets.drink_tile import DrinkTile
 from models.product_model import Product
-# from featurea.product.widgets.drink_tile import DrinkTile
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH.parent.parent.parent / "assets/frame0"
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
-# ASSETS_PATH = OUTPUT_PATH / Path(r"Monitor_App/assets/frame1")
 
 OUTPUT_PATH1 = Path(__file__).parent
 ASSETS_PATH1 = OUTPUT_PATH1.parent.parent.parent / "assets/frame1" 
-# ASSETS_PATH = OUTPUT_PATH / Path(r"Monitor_App/assets/frame1")
 
 def relative_to_assets1(path: str) -> Path:
     return ASSETS_PATH1 / Path(path)
@@ -41,166 +37,175 @@ def relative_to_assets2(path: str) -> Path:
 
 window = Tk()
 window.geometry("1024x720")
-# screen_width = window.winfo_screenwidth()
-# screen_height = window.winfo_screenheight()
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
 # window.geometry(f"{screen_width}x{screen_height}+0+0")
 window.configure(bg = "#FFFFFF")
 
 screen_width = window.winfo_screenwidth()
-# Scrollable canvas setup
-canvas_container = Frame(window)  # A container for canvas and scrollbar
-canvas_container.pack(side="left", fill="both", expand=True)
 
-# # Scrolling setup
-canvas1 = Canvas(canvas_container, bg="white")
-canvas1.pack(side="left", fill="both", expand=True)
-scrollable_frame = Frame(canvas1, bg="white", width=720) # Adjust width as needed
-scrollable_frame.bind( # Configure for dynamic scroll region
-       "<Configure>",
-       lambda e: canvas1.configure(
-           scrollregion=canvas1.bbox("all")
-       )
-   )
+class ProductMenuScreen(Frame):
+    def __init__(self, parent):
 
-def on_mousewheel(event):
-    if event.delta:
-        canvas1.yview_scroll(int(-1 * (event.delta / 120) * 3), "pages")  # Windows
-    else:
-        if event.num == 5:
-            canvas1.yview_scroll(1, "units") 
-        elif event.num == 4:
-            canvas1.yview_scroll(-1, "units") 
+        # Scrollable canvas setup
+        self.canvas_container = Frame(parent)  # A container for canvas and scrollbar
+        self.canvas_container.pack(side="left", fill="both", expand=True)
 
-# Bind mousewheel to the canvas
-canvas1.bind_all("<MouseWheel>", on_mousewheel)
+        # frame_screen = Frame(canvas_container, bg="red")
+        # frame_screen.pack(side="left", fill="both", expand=True)
 
-# canvas.configure(yscrollcommand=scrollbar.set)
-# Create drinks frame
-drinks_frame = Frame(scrollable_frame, bg="white")
-drinks_frame.pack(pady=210, padx=10, side="left")
-
-scrollbar = Scrollbar(window, orient="vertical", command=canvas1.yview)
-scrollbar.pack(side="right", fill="y")
-canvas1.configure(yscrollcommand=scrollbar.set)
-canvas1.create_window(0, 0, window=scrollable_frame, anchor='nw') 
-
-# # Top canvas
- 
-# top_canvas = Canvas(scrollable_frame, bg="#FFFFFF", height=200, width=window.winfo_screenwidth(), bd=0, highlightthickness=0, relief="ridge")
-# top_canvas.place(x=0, y=0)
-# top_canvas.create_text(64.0, 117.0, anchor="nw", text="Choose your drink", fill="#11284C", font=("Niradei Bold", 32 * -1))
-
-top_canvas = Canvas(
-    scrollable_frame,
-    bg = "#FFFFFF",
-    height = 200,
-    width = screen_width,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-top_canvas.place(x = 0, y = 0)
-top_canvas.create_text(
-    64.0,
-    117.0,
-    anchor="nw",
-    text="Choose your drink",
-    fill="#11284C",
-    font=("Niradei Bold", 32 * -1)
-)
-image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
-top_canvas.create_image(
-    108.0,
-    49.0,
-    image=image_image_1
-)
-top_canvas.create_text(
-    164.3662109375,
-    37.4525146484375,
-    anchor="nw",
-    text="Robot Cafe",
-    fill="#11284C",
-    font=("CADTMonoDisplay Regular", 32 * -1)
-)
-
-async def create_drink_menu():
-    
-    loading_label = Label(drinks_frame, text="Loading...")
-    loading_label.grid(row=0, column=0)
-    product_data = await ProductServices.fetch_coffee_data_async()
-    loading_label.destroy()
-
-
-    def load_image_from_url(url):
-        response = requests.get(url)
-        img = Image.open(BytesIO(response.content))
-        img = img.resize((171, 171), Image.ADAPTIVE)
-        return ImageTk.PhotoImage(img)
-    def create_widgets(parent, drink_id, drink_flavour, drink_price, drink_description, image_url): 
-
-        image = load_image_from_url(image_url) 
-        image_label = Label(parent, image=image, width=171, height=171, background="white")
-        image_label.image = image
-        image_label.grid(row=0, column=0, rowspan=2, padx=8, pady=8)
-        image_label.bind("<Button-1>", lambda event, id=drink_id, name= drink_flavour, price= drink_price, description=drink_description, url = image_url: show_item_detail(id, name, price, description, url))
-        flavour_label = Label(frame, text=drink_flavour, font=('Helvetica', 15),bg="white", padx=8)
-        flavour_label.grid(row=2, column=0, sticky="w")
-        # flavour_label.bind("<Button-1>", self.show_product_detail)
-        price_label = Label(frame, text=f"${drink_price:.2f}", font=('Helvetica', 20), bg="white", padx=8)
-        price_label.grid(row=3, column=0, sticky="w")
-        price_label.bind("<Button-1>", lambda event, id=drink_id, name= drink_flavour, price= drink_price, description=drink_description, url = image_url: show_item_detail(event, id, name, price, description, url))
-
-    
-    def show_item_detail(event, drink_id, drink_name, drink_price, drink_description, drink_image):
-        # canvas1.pack_forget()
-        canvas1.destroy()
-        scrollable_frame.destroy()
-        scrollbar.destroy()
-        top_canvas.destroy()
-        print("product")
-        print(canvas_container.winfo_width())
-        print(canvas_container.winfo_height())
-
-        ItemDetailPage(canvas_container, drink_id ,drink_name, drink_price, drink_description, drink_image)
-        
-
-    row = 0
-    column = 0
-    for i, drink_data in enumerate(product_data):
-        drink = Product(
-            id = drink_data["_id"],
-            name=drink_data["name"],
-            description=drink_data["description"],
-            price=drink_data["price"],
-            image_url=drink_data["image"]
+        # # Scrolling setup
+        self.canvas1 = Canvas(self.canvas_container, bg="white")
+        self.canvas1.pack(side="left", fill="both", expand=True)
+        self.scrollable_frame = Frame(self.canvas1, bg="white", width=720) # Adjust width as needed
+        self.scrollable_frame.bind( # Configure for dynamic scroll region
+            "<Configure>",
+            lambda e: self.canvas1.configure(
+                scrollregion=self.canvas1.bbox("all")
+            )
         )
-        frame = Frame(drinks_frame, background="white", borderwidth=2, highlightbackground="red", highlightthickness=1) 
-        frame.grid(row=row, column=column, padx=10, pady=10, sticky="w")
-        
-        # Create and configure drink display elements
-        
-            # ... similar code for flavour_label and price_label ...
 
-        create_widgets(frame, drink.id, drink.name, drink.price, drink.description, drink.image_url) 
-        # Call the function to create widgets inside drink_frame
+        def on_mousewheel(event):
+            if event.delta:
+                self.canvas1.yview_scroll(int(-1 * (event.delta / 120) * 3), "pages")  # Windows
+            else:
+                if event.num == 5:
+                    self.canvas1.yview_scroll(1, "units") 
+                elif event.num == 4:
+                    self.canvas1.yview_scroll(-1, "units") 
 
-        # DrinkTile(
-        #     parent=frame, 
-        #     drink_id = drink.id,
-        #     drink_flavour=drink.name,
-        #     drink_price=drink.price,
-        #     drink_description=drink.description,
-        #     drink_image=drink.image_url
-        # )
+        # Bind mousewheel to the canvas
+        self.canvas1.bind_all("<MouseWheel>", on_mousewheel)
+
+        # canvas.configure(yscrollcommand=scrollbar.set)
+        # Create drinks frame
+        self.drinks_frame = Frame(self.scrollable_frame, bg="white")
+        self.drinks_frame.pack(pady=210, padx=10, side="left")
+
+        scrollbar = Scrollbar(window, orient="vertical", command=self.canvas1.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas1.configure(yscrollcommand=scrollbar.set)
+        self.canvas1.create_window(0, 0, window=self.scrollable_frame, anchor='nw') 
+
+        top_canvas = Canvas(
+            self.scrollable_frame,
+            bg = "#FFFFFF",
+            height = 200,
+            width = screen_width,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+        top_canvas.place(x = 0, y = 0)
+        top_canvas.create_text(
+            64.0,
+            117.0,
+            anchor="nw",
+            text="Choose your drink",
+            fill="#11284C",
+            font=("Niradei Bold", 32 * -1)
+        )
+        image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
+        top_canvas.create_image(
+            108.0,
+            49.0,
+            image=image_image_1
+        )
+        top_canvas.create_text(
+            164.3662109375,
+            37.4525146484375,
+            anchor="nw",
+            text="Robot Cafe",
+            fill="#11284C",
+            font=("CADTMonoDisplay Regular", 32 * -1)
+        )
+        # loop = asyncio.get_event_loop()       
+        # loop.run_until_complete(self.create_drink_menu())
+        asyncio.create_task(self.create_drink_menu()) 
+
+
+    async def create_drink_menu(self):
         
+        loading_label = Label(self.drinks_frame, text="Loading...")
+        loading_label.grid(row=0, column=0)
+        product_data = await ProductServices.fetch_coffee_data_async()
+        loading_label.destroy()
+
+
+        def load_image_from_url(url):
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((171, 171), Image.ADAPTIVE)
+            return ImageTk.PhotoImage(img)
+        def create_widgets(parent, drink_id, drink_flavour, drink_price, drink_description, image_url): 
+
+            image = load_image_from_url(image_url) 
+            image_label = Label(parent, image=image, width=171, height=171, background="white")
+            image_label.image = image
+            image_label.grid(row=0, column=0, rowspan=2, padx=8, pady=8)
+            image_label.bind("<Button-1>", lambda event, id=drink_id, name= drink_flavour, price= drink_price, description=drink_description, url = image_url: show_item_detail(event, id, name, price, description, url))
+            flavour_label = Label(frame, text=drink_flavour, font=('Helvetica', 15),bg="white", padx=8)
+            flavour_label.grid(row=2, column=0, sticky="w")
+            # flavour_label.bind("<Button-1>", self.show_product_detail)
+            price_label = Label(frame, text=f"${drink_price:.2f}", font=('Helvetica', 20), bg="white", padx=8)
+            price_label.grid(row=3, column=0, sticky="w")
+            price_label.bind("<Button-1>", lambda event, id=drink_id, name= drink_flavour, price= drink_price, description=drink_description, url = image_url: show_item_detail(event, id, name, price, description, url))
+
         
-        column += 1
-        if column == 4:  # Or some other number of columns you prefer
-            row += 1
-            column = 0
-        print(drink.image_url)
-        print("row:" + str(row) + " " + "Column: " + str(column) )
-    
+        def show_item_detail(event, drink_id, drink_name, drink_price, drink_description, drink_image):
+            # canvas1.pack_forget()
+            # scrollable_frame.pack_forget()
+            # scrollbar.pack_forget()
+            # top_canvas.pack_forget()
+            # canvas1.destroy()
+            # scrollable_frame.destroy()
+            # scrollbar.destroy()
+            # top_canvas.destroy()
+            # frame_screen.lower()
+            print("product")
+            print(self.canvas_container.winfo_width())
+            print(self.canvas_container.winfo_height())
+            
+            ItemDetailPage(self.canvas_container, drink_id ,drink_name, drink_price, drink_description, drink_image)
+        
+
+        row = 0
+        column = 0
+        for i, drink_data in enumerate(product_data):
+            drink = Product(
+                id = drink_data["_id"],
+                name=drink_data["name"],
+                description=drink_data["description"],
+                price=drink_data["price"],
+                image_url=drink_data["image"]
+            )
+            frame = Frame(self.drinks_frame, background="white", borderwidth=2, highlightbackground="red", highlightthickness=1) 
+            frame.grid(row=row, column=column, padx=10, pady=10, sticky="w")
+            
+            # Create and configure drink display elements
+            
+                # ... similar code for flavour_label and price_label ...
+
+            create_widgets(frame, drink.id, drink.name, drink.price, drink.description, drink.image_url) 
+            # Call the function to create widgets inside drink_frame
+
+            # DrinkTile(
+            #     parent=frame, 
+            #     drink_id = drink.id,
+            #     drink_flavour=drink.name,
+            #     drink_price=drink.price,
+            #     drink_description=drink.description,
+            #     drink_image=drink.image_url
+            # )
+            
+            
+            column += 1
+            if column == 4:  # Or some other number of columns you prefer
+                row += 1
+                column = 0
+            print(drink.image_url)
+            print("row:" + str(row) + " " + "Column: " + str(column) )
+        
     #     ItemDetailPage( drink.id ,drink.name, drink.price, drink.description, drink.image_url)
 
 # button_image_4 = PhotoImage(
@@ -242,8 +247,6 @@ async def create_drink_menu():
 #     outline="")
         
 # Create drink widgets asynchronously
-loop = asyncio.get_event_loop()       
-loop.run_until_complete(create_drink_menu())
 
 
 window.resizable(False, False)

@@ -3,15 +3,17 @@
 # https://github.com/ParthJadhav/Tkinter-Designer
 
 
+import asyncio
 from io import BytesIO
 from pathlib import Path
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import NW,  Label, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame
+from tkinter import NW,  Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, Frame
 # from tkinter.tix import IMAGETEXT
 from PIL import Image, ImageTk
 import requests
+
 
 
 
@@ -34,21 +36,23 @@ class ItemDetailPage(Frame):
         self.drink_description = drink_description
         self.drink_image = drink_image
         self.quantity = 1
-        self.pack()
+        self.tkraise()
+        self.pack(side="left", fill="both", expand=True)
+        
         # Set main window to maximum screen
-        # screen_width = self.winfo_screenwidth()
-        # screen_height = self.winfo_screenheight()
-        # self.geometry(f"{screen_width}x{screen_height}+0+0")
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        self.geometry(f"{screen_width}x{screen_height}+0+0")
         
         # self.geometry("1024x720")
         # self.configure(bg = "#FFFFFF")
         # root = Tk()
         # canvas1 = Canvas(root)
         # canvas1.pack()
+    
         
-
         canvas = Canvas(
-            parent,
+            self,
             bg = "#FFFFFF",
             height = 720,
             width = 1024,
@@ -78,66 +82,17 @@ class ItemDetailPage(Frame):
             return ImageTk.PhotoImage(img)
         
         image = load_image_from_url(drink_image) 
-        # image_logo = Label(canvas, image=image, width=171, height=171, background="green")
-        # image_logo.image = image
-        # image_logo.pack(pady= 100, anchor="center")
-        # image_logo.lift()
         image_object = PhotoImage(file=relative_to_assets2("image_1.png"))
-        # print(image_object)
-        # image_label = Label(canvas, image=image_object, bg="red")
-        # image_label.image = image_object  # Store reference
-        # image_label.pack(pady=50, expand=False)
-        # image_label.lower()
-
-
         
         canvas1 = Canvas(canvas, width=409, height=374)  # Adjust size if needed
         canvas1.pack() 
         image_label = Label(canvas1, image=image_object, bg="#FF4438")
         image_label.image = image_object
-        # image_label.pack()
         canvas1.create_window(0, 0, window=image_label, anchor="nw")
         
         image_logo = Label(canvas1, image=image, width=250, height=250)
         image_logo.image = image
-        # image_logo.pack()
         canvas1.create_window(86, 50, window=image_logo, anchor="nw")
-
-        # title_text.configure(justify="center")
-        # canvas.create_text(
-        #     333.0,
-        #     35.0,
-        #     anchor="nw",
-        #     text="Green Tea",
-        #     fill="#FFFFFF",
-        #     font=("CADTMonoDisplay Regular", 48 * -1)
-        # )
-
-        
-      
-        # image_image_1 = PhotoImage(
-        #     file=relative_to_assets2("image_1.png"))
-        # print(image_image_1)
-        # image_1 = canvas.create_image(
-        #     511.0,
-        #     280.0,
-        #     anchor=NW,
-        #     image=image_image_1
-        # )
-
-
-        # image_image_2 = PhotoImage(
-        #     file=relative_to_assets2("image_2.png"))
-        
-        # image_2 = canvas.create_image(
-        #     511.0,
-        #     298.0,
-        #     image=image_image_2
-        # )
-        # Create a debug window
-      
-        # canvas2 = Canvas(canvas, bg="purple", width=316, height=66)  # Adjust size if needed
-        # canvas2.pack(pady=50) 
         button_image_1 = PhotoImage(
             file=relative_to_assets2("button_1.png")
         )
@@ -147,7 +102,7 @@ class ItemDetailPage(Frame):
             borderwidth=0,
             highlightthickness=0,
             bg="#FF4438",
-            command=lambda: print("button_1 clicked"),
+            command=lambda:print("button_1 clicked"),
             relief="flat"
         )
         button_1.image = button_image_1
@@ -168,33 +123,13 @@ class ItemDetailPage(Frame):
             image=button_image_2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: print("button_2 clicked"),
+            command= self.go_back,
             relief="flat"
         )
         button_2.image = button_image_2
 
-        # button_image_2 = PhotoImage(
-        #     file=relative_to_assets2("button_2.png"))
-        # button_2 = Button(
-        #     canvas,
-        #     image=button_image_2,
-        #     borderwidth=0,
-        #     highlightthickness=0,
-        #     command=lambda: print("button_2 clicked"),
-        #     relief="flat"
-        # )
-        # button_2.image = button_image_2
         button_2.place(x=86, y=50)
-        # image_label = Label(canvas1, image=button_image_1, bg="#FF4438")
-        # image_label.image = image_object
-        # # image_label.pack()
-        # canvas2.create_window(0, 0, window=image_label, anchor="nw")
-        
-        
-        # debug_window = Toplevel()
-        # label = Label(parent, image=button_image_1)
-        # label.pack()
-        # print(relative_to_assets2("button_1.png"))
+
         canvas.create_text(
             18.0,
             236.0,
@@ -204,23 +139,6 @@ class ItemDetailPage(Frame):
             font=("Niradei Bold", 28 * -1)
         )
 
-        # image_image_3 = PhotoImage(
-        #     file=relative_to_assets2("image_3.png")
-        # )
-        # # canvas_image3 = Canvas(canvas, bg="purple", width=142, height=42)  # Adjust size if needed
-        # # canvas_image3.pack(side="left") 
-        # image_label3 = Label(canvas1, image=image_image_3, bg="#FF4438")
-        # image_label3.image = image_image_3
-        # # image_label.pack()
-        # canvas1.create_window(410, 150, window=image_label3, anchor="ne")
-        
-        # image_image_3 = PhotoImage(
-        #     file=relative_to_assets2("image_3.png"))
-        # image_3 = canvas.create_image(
-        #     390.0,
-        #     260.4375,
-        #     image=image_image_3
-        # )
 
         canvas.create_text(
             716.0,
@@ -230,20 +148,7 @@ class ItemDetailPage(Frame):
             fill="#FFFFFF",
             font=("Niradei Regular", 28 * -1)
         )
-        
-        # image_image_4 = PhotoImage(
-        #     file=relative_to_assets2("image_4.png"))
-        
-        # image_label4 = Label(canvas1, image=image_image_4, bg="#FF4438")
-        # image_label4.image = image_image_4
-        # canvas1.create_window(0, 150, window=image_label4, anchor="nw")
-
-
-        # image_4 = canvas.create_image(
-        #     628.0,
-        #     274.5,
-        #     image=image_image_4
-        # )
+  
 
         canvas.create_text(
             90.0,
@@ -254,19 +159,7 @@ class ItemDetailPage(Frame):
             font=("Niradei Regular", 28 * -1)
         )
 
-        # image_image_5 = PhotoImage(
-        #     file=relative_to_assets2("image_5.png")
-        # )
-        # image_label5 = Label(canvas1, image=image_image_5, bg="#FF4438")
-        # image_label5.image = image_image_5
-        # canvas1.create_window(410, 320, window=image_label5, anchor="se")
 
-
-        # image_5 = canvas.create_image(
-        #     412.5887451171875,
-        #     366.32843017578125,
-        #     image=image_image_5
-        # )
 
         canvas.create_text(
             723.0,
@@ -276,43 +169,6 @@ class ItemDetailPage(Frame):
             fill="#FFFFFF",
             font=("Niradei Bold", 28 * -1)
         )
-
-        # image_image_6 = PhotoImage(
-        #     file=relative_to_assets2("image_6.png"))
-        # image_label6 = Label(canvas1, image=image_image_6, bg="#FF4438")
-        # image_label6.image = image_image_6
-        # canvas1.create_window(0, 320, window=image_label6, anchor="sw")
-        # # image_6 = canvas.create_image(
-        #     631.0,
-        #     380.1875,
-        #     image=image_image_6
-        # )
-
-        # canvas.create_text(
-        #     366.0,
-        #     510.0,
-        #     anchor="nw",
-        #     text="Enjoy your drink",
-        #     fill="#FFFFFF",
-        #     font=("Niradei Regular", 36 * -1)
-        # )
-
-       
-        # button_2.place(
-        #     x=86.0,
-        #     y=50.0,
-        #     width=45.0,
-        #     height=47.0
-        # )
-
-        # canvas.create_rectangle(
-        #     843.0,
-        #     0.0,
-        #     938.0,
-        #     123.0,
-        #     fill="#FF4438",
-        #     outline=""
-        # )
 
         canvas.create_rectangle(
             843.0,
@@ -326,10 +182,119 @@ class ItemDetailPage(Frame):
             865.0,
             38.0,
             anchor="nw",
-            text=f"${self.drink_price}",
+            text=f"${drink_price}",
             fill="#FFFFFF",
             font=("Niradei Bold", 36 * -1)
         )
+    
+    def go_back(self):
+        print("Go back to menu")
+        self.pack_forget()
+        # self.destroy()
+        
+        # # self.master.destroy()
+        import features.product.screens.product_menu_page as product_menu_page
+        if not hasattr(product_menu_page, 'window') or product_menu_page.window.winfo_exists() == 0: 
+        # Check if the window exists or has been destroyed
+            # product_menu_page.canvas_container.pack()
+            product_menu_page.frame_screen.lift()
+            # product_menu_page.create_drink_menu()  # Initialize and create the window
+        # product_menu_page.canvas_container.pack()
+        # product_menu_page.frame_screen.pack()
+        # product_menu_page.canvas1.pack()
+        # product_menu_page.scrollable_frame.pack()
+        # product_menu_page.scrollbar.pack()
+        # product_menu_page.top_canvas.pack()
+        # product_menu_page.loop = asyncio.get_event_loop()       
+        # product_menu_page.loop.run_until_complete(product_menu_page.create_drink_menu())
 
+        # product_menu_page.canvas1.pack()
+        # product_menu_page.scrollable_frame.pack()
+        # product_menu_page.scrollbar.pack()
+        # product_menu_page.top_canvas.pack()
 
+        # product_menu_page.window
+        # # screen_width = product_menu_page.window.winfo_screenwidth()
+        # # Scrollable canvas setup
+        # # canvas_container = Frame(product_menu_page.window)  # A container for canvas and scrollbar
+        # # canvas_container.pack(side="left", fill="both", expand=True)
 
+        # product_menu_page.canvas1.pack()
+        # product_menu_page.scrollable_frame.pack()
+        # product_menu_page.scrollbar.pack()
+        # product_menu_page.top_canvas.pack()
+        # product_menu_page.create_drink_menu()
+        # # # Scrolling setup
+        # canvas1 = Canvas(canvas_container, bg="white")
+        # canvas1.pack(side="left", fill="both", expand=True)
+        # scrollable_frame = Frame(canvas1, bg="white", width=720) # Adjust width as needed
+        # scrollable_frame.bind( # Configure for dynamic scroll region
+        #     "<Configure>",
+        #     lambda e: canvas1.configure(
+        #         scrollregion=canvas1.bbox("all")
+        #     )
+        # )
+
+        # def on_mousewheel(event):
+        #     if event.delta:
+        #         canvas1.yview_scroll(int(-1 * (event.delta / 120) * 3), "pages")  # Windows
+        #     else:
+        #         if event.num == 5:
+        #             canvas1.yview_scroll(1, "units") 
+        #         elif event.num == 4:
+        #             canvas1.yview_scroll(-1, "units") 
+
+        # # Bind mousewheel to the canvas
+        # canvas1.bind_all("<MouseWheel>", on_mousewheel)
+
+        # # canvas.configure(yscrollcommand=scrollbar.set)
+        # # Create drinks frame
+        # drinks_frame = Frame(scrollable_frame, bg="white")
+        # drinks_frame.pack(pady=210, padx=10, side="left")
+
+        # scrollbar = Scrollbar(product_menu_page.window, orient="vertical", command=canvas1.yview)
+        # scrollbar.pack(side="right", fill="y")
+        # canvas1.configure(yscrollcommand=scrollbar.set)
+        # canvas1.create_window(0, 0, window=scrollable_frame, anchor='nw') 
+
+        # # # Top canvas
+        
+        # # top_canvas = Canvas(scrollable_frame, bg="#FFFFFF", height=200, width=window.winfo_screenwidth(), bd=0, highlightthickness=0, relief="ridge")
+        # # top_canvas.place(x=0, y=0)
+        # # top_canvas.create_text(64.0, 117.0, anchor="nw", text="Choose your drink", fill="#11284C", font=("Niradei Bold", 32 * -1))
+
+        # top_canvas = Canvas(
+        #     scrollable_frame,
+        #     bg = "#FFFFFF",
+        #     height = 200,
+        #     width = screen_width,
+        #     bd = 0,
+        #     highlightthickness = 0,
+        #     relief = "ridge"
+        # )
+        # top_canvas.place(x = 0, y = 0)
+        # top_canvas.create_text(
+        #     64.0,
+        #     117.0,
+        #     anchor="nw",
+        #     text="Choose your drink",
+        #     fill="#11284C",
+        #     font=("Niradei Bold", 32 * -1)
+        # )
+        # image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
+        # top_canvas.create_image(
+        #     108.0,
+        #     49.0,
+        #     image=image_image_1
+        # )
+        # top_canvas.create_text(
+        #     164.3662109375,
+        #     37.4525146484375,
+        #     anchor="nw",
+        #     text="Robot Cafe",
+        #     fill="#11284C",
+        #     font=("CADTMonoDisplay Regular", 32 * -1)
+        # )
+        # loop = asyncio.get_event_loop()       
+        # loop.run_until_complete(product_menu_page.create_drink_menu())
+        

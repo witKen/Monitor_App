@@ -5,6 +5,8 @@
 
 
 
+import asyncio
+from io import BytesIO
 from pathlib import Path
 
 
@@ -12,9 +14,15 @@ from pathlib import Path
 
 # Explicit imports to satisfy Flake8
 
-from tkinter import Label, StringVar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, messagebox
+from tkinter import Frame, Label, Scrollbar, StringVar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel, messagebox
 import customtkinter
 import re
+from PIL import Image, ImageTk
+import requests
+
+from features.product.services.order_services import OrderServices
+from features.product.services.product_services import ProductServices
+from models.product_model import Product
 
 OUTPUT_PATH = Path(__file__).parent
 
@@ -23,139 +31,774 @@ ASSETS_PATH = OUTPUT_PATH / "assets/frame0"
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
-OUTPUT_PATH2 = Path(__file__).parent
-ASSETS_PATH2 = OUTPUT_PATH2.parent.parent.parent / "assets/frame2" 
+# OUTPUT_PATH1 = Path(__file__).parent
+ASSETS_PATH1 = OUTPUT_PATH / "assets/frame1" 
+
+def relative_to_assets1(path: str) -> Path:
+    return ASSETS_PATH1 / Path(path)
+
+# OUTPUT_PATH2 = Path(__file__).parent
+ASSETS_PATH2 = OUTPUT_PATH / "assets/frame2" 
 
 def relative_to_assets2(path: str) -> Path:
     return ASSETS_PATH2 / Path(path)
 
-#frame setup
-window = Tk()
-window.geometry("1024x720")
-window.configure(bg = "#FFFFFF")
+
+ASSETS_PATH3 = OUTPUT_PATH / "assets/frame3" 
+
+def relative_to_assets3(path: str) -> Path:
+    return ASSETS_PATH3 / Path(path)
+
+# #frame setup
+# window = Tk()
+# window.geometry("1024x720")
+# window.configure(bg = "#FFFFFF")
 
 # app_font
-entry_font = customtkinter.CTkFont(family="Arial", size=16)
 
 
-# validate user signin
-username_error_message = StringVar()  # String variable for username error
-password_error_message = StringVar()  # String variable for password error
+
+class LoginScreen(Frame): 
+
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        # validate user signin
+        self.username_error_message = StringVar()  # String variable for username error
+        self.password_error_message = StringVar()  # String variable for password error
+        self.pack(fill="both", expand=True)
+        self.canvas = Canvas(self, bg = "#FFFFFF", height = 720, width = 1024, bd = 0, highlightthickness = 0, relief = "ridge")
+        self.canvas.place(x = 0, y = 0)
+        self.canvas.create_text(
+            484.5166015625,
+            91.0,
+            anchor="nw",
+            text="Robot Cafe",
+            fill="#11284C",
+            font=("CADTMonoDisplay Regular", 40 * -1)
+        )
+
+        self.image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
+      
+        self.canvas.create_image(
+            427.0,
+            90.0,
+            image=self.image_image_1
+        )
+
+        self.username_label = customtkinter.CTkLabel(self, text="Username", text_color="#11284c", font=parent.entry_font, bg_color="#FFFFFF")
+        self.username_label.place(x=293.0, y=210.0)
+
+        self.username_entry = customtkinter.CTkEntry(
+            self, 
+            placeholder_text_color='#11284c',
+            font=parent.entry_font, 
+            border_color='#11284c',
+            corner_radius=0,  
+            height=64,
+            width=440
+        )  
+
+        self.username_entry.place(
+            x=293.0,
+            y=242.0,
+        )
+
+        self.username_error_label = Label(self, textvariable=self.username_error_message,bg="#FFFFFF", fg="red", font=("Arial", 10))
+        self.username_error_label.place(x=293, y=310)  # Adjust placement 
 
 
-def register():
 
-    # get information
-    username = username_entry.get()
-    password = password_entry.get()
+        password = StringVar()  #Password variable
+        bullet = "\u2022"       #specifies bullet character
 
-    username_error = ""
-    password_error = ""
+        self.password_label = customtkinter.CTkLabel(self, text="Password", text_color="#11284c", font=parent.entry_font, bg_color="#FFFFFF")
+        self.password_label.place(x=293.0, y=330.0)
 
-    username_validate = False
-    password_validate = False
+        self.password_entry = customtkinter.CTkEntry(self, placeholder_text="Password", font=parent.entry_font, placeholder_text_color='#11284c', border_color='#11284c',corner_radius=0,  height=64, width=440, textvariable=password, show=bullet)
+        self.password_entry.place(x=293.0, y=360.0,)
 
-    pattern = r"^[a-zA-Z0-9_]+$"
-    # validate username
-    if not username: 
-        username_error = "Username cannot be empty."
-    elif len(username) < 5: 
-        username_error = "Username must be at least 5 characters long."
+        self.password_error_label = Label(self, textvariable=self.password_error_message, bg="#FFFFFF", fg="red", font=("Arial", 10))
+        self.password_error_label.place(x=293, y=425)  # Adjust placement as needed
+
+
+        self.button_image_1 = PhotoImage(file=relative_to_assets("button_1.png"))
+        button_submit = Button(image=self.button_image_1, borderwidth=0, highlightthickness=0, command=lambda: self.register_new_screen(controller), relief="flat" )
+        button_submit.place(x=293.0, y=485.15826416015625, width=439.0, height=65.8499984741211)
+        print(self.image_image_1)
+        print("Image 1")
+        print(self.button_image_1)
+
+        
+  
+    def register_new_screen(self, controller):
+
+        # get information
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        username_error = ""
+        password_error = ""
+
+        username_validate = False
+        password_validate = False
+
+        pattern = r"^[a-zA-Z0-9_]+$"
+        # validate username
+        if not username: 
+            username_error = "Username cannot be empty."
+        elif len(username) < 5: 
+            username_error = "Username must be at least 5 characters long."
+                
+        elif not re.fullmatch(pattern, username):
+            username_error = "Username must not contain any special characters."
+        elif username == "heaklinh":
+            username_validate = True
+        
             
-    elif not re.fullmatch(pattern, username):
-        username_error = "Username must not contain any special characters."
-    elif username == "heaklinh":
-        username_validate = True
-       
-        
-    #validate password
-    if not password:
-        password_error = "Password cannot be empty."
-    elif len(password) < 8:
-        password_error = "Password must contains at least 8 characters"
-    elif password == "heaklinh123":
-        password_validate = True
+        #validate password
+        if not password:
+            password_error = "Password cannot be empty."
+        elif len(password) < 8:
+            password_error = "Password must contains at least 8 characters"
+        elif password == "heaklinh123":
+            password_validate = True
 
-    username_error_message.set(username_error)  # Update error message variables
-    password_error_message.set(password_error)
-    if username_validate & password_validate:
-
-        window.destroy()
-        import features.product.screens.product_menu_page as product_menu_page
-        product_menu_page.window
-        
-    # window.update_idletasks()
-    # store information (add your logic here)
-    # window.withdraw()
-    # parent_window = window
-    # from gui1 import menu_screen
-    # menu_screen(parent_window)
+        self.username_error_message.set(username_error)  # Update error message variables
+        self.password_error_message.set(password_error)
+        if username_validate & password_validate:
+            print("Validated!")
+            controller("product_menu_screen") 
+            # controller("product_menu_screen")
+            # window.destroy()
+            # import features.product.screens.product_menu_page as product_menu_page
+            # product_menu_page.window
+            
+        # window.update_idletasks()
+        # store information (add your logic here)
+        # window.withdraw()
+        # parent_window = window
+        # from gui1 import menu_screen
+        # menu_screen(parent_window)
 
 
+
+class ProductMenuScreen(Frame):
+    OUTPUT_PATH = Path(__file__).parent 
+    ASSETS_PATH1 = OUTPUT_PATH / "assets/frame1" 
+
+    def relative_to_assets1(path: str) -> Path:
+        return ASSETS_PATH1 / Path(path)
     
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg="yellow")
+        # Scrollable canvas setup
+        self.pack(fill="both", expand=True)
+        self.canvas_container = Frame(self)  # A container for canvas and scrollbar
+        self.canvas_container.pack(side="left", fill="both", expand=True)
 
-canvas = Canvas(window, bg = "#FFFFFF", height = 720, width = 1024, bd = 0, highlightthickness = 0, relief = "ridge")
-canvas.place(x = 0, y = 0)
-canvas.create_text(
-    484.5166015625,
-    91.0,
-    anchor="nw",
-    text="Robot Cafe",
-    fill="#11284C",
-    font=("CADTMonoDisplay Regular", 40 * -1)
-)
+        # frame_screen = Frame(canvas_container, bg="red")
+        # frame_screen.pack(side="left", fill="both", expand=True)
+
+        # # Scrolling setup
+        self.canvas1 = Canvas(self.canvas_container, bg="white")
+        self.canvas1.pack(side="left", fill="both", expand=True)
+        self.scrollable_frame = Frame(self.canvas1, bg="white", width=720) # Adjust width as needed
+        self.scrollable_frame.bind( # Configure for dynamic scroll region
+            "<Configure>",
+            lambda e: self.canvas1.configure(
+                scrollregion=self.canvas1.bbox("all")
+            )
+        )
+
+        def on_mousewheel(event):
+            if event.delta:
+                self.canvas1.yview_scroll(int(-1 * (event.delta / 120) * 3), "pages")  # Windows
+            else:
+                if event.num == 5:
+                    self.canvas1.yview_scroll(1, "units") 
+                elif event.num == 4:
+                    self.canvas1.yview_scroll(-1, "units") 
+
+        # Bind mousewheel to the canvas
+        self.canvas1.bind_all("<MouseWheel>", on_mousewheel)
+
+        # canvas.configure(yscrollcommand=scrollbar.set)
+        # Create drinks frame
+        self.drinks_frame = Frame(self.scrollable_frame, bg="white")
+        self.drinks_frame.pack(pady=210, padx=10, side="left")
+
+        self.scrollbar = Scrollbar(self, orient="vertical", command=self.canvas1.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.canvas1.configure(yscrollcommand=self.scrollbar.set)
+        self.canvas1.create_window(0, 0, window=self.scrollable_frame, anchor='nw') 
+
+        self.top_canvas = Canvas(
+            self.scrollable_frame,
+            bg = "#FFFFFF",
+            height = 200,
+            width = 1024,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+        self.top_canvas.place(x = 0, y = 0)
+        self.top_canvas.create_text(
+            64.0,
+            117.0,
+            anchor="nw",
+            text="Choose your drink",
+            fill="#11284C",
+            font=("Niradei Bold", 32 * -1)
+        )
+        
+
+        # image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
+
+        # self.top_canvas.create_image(
+        #     108.0,
+        #     49.0,
+        #     image=image_image_1
+        # )
+        self.logo_image1 = PhotoImage(file=relative_to_assets1("logo_image.png"))
+        
+        print(relative_to_assets1("logo_image.png"))
+        print(self.logo_image1)
+        self.top_canvas.create_image(
+            108.0,
+            49.0,
+            image=self.logo_image1
+        )
+        
+        self.top_canvas.create_text(
+            164.3662109375,
+            37.4525146484375,
+            anchor="nw",
+            text="Robot Cafe",
+            fill="#11284C",
+            font=("CADTMonoDisplay Regular", 32 * -1)
+        )
+        self.loop = asyncio.get_event_loop()       
+        self.loop.run_until_complete(self.create_drink_menu(controller=controller))
+        # asyncio.create_task(self.create_drink_menu()) 
 
 
-image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))
-print(image_image_1)
-image_1 = canvas.create_image(
-    427.0,
-    90.0,
-    image=image_image_1
-)
-
-username_label = customtkinter.CTkLabel(window, text="Username", text_color="#11284c", font=entry_font)
-username_label.place(x=293.0, y=210.0)
-
-username_entry = customtkinter.CTkEntry(
-    window, 
-    placeholder_text_color='#11284c',
-    font=entry_font, 
-    border_color='#11284c',
-    corner_radius=0,  
-    height=64,
-    width=440
-)  
-
-username_entry.place(
-    x=293.0,
-    y=242.0,
-)
-
-username_error_label = Label(window, textvariable=username_error_message,bg="#FFFFFF", fg="red", font=("Arial", 10))
-username_error_label.place(x=293, y=310)  # Adjust placement 
+    async def create_drink_menu(self, controller):
+        
+        self.loading_label = Label(self.canvas1, text="Loading...",)
+        self.loading_label.pack(fill="both", expand=True)
+        # self.update()
+        product_data = await ProductServices.fetch_coffee_data_async()
+        self.after(100, lambda: self.loading_label.destroy())
 
 
+        def load_image_from_url(url):
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((171, 171), Image.ADAPTIVE)
+            return ImageTk.PhotoImage(img)
+        def create_widgets(parent, drink_id, drink_flavour, drink_price, drink_description, image_url): 
 
-password = StringVar()  #Password variable
-bullet = "\u2022"       #specifies bullet character
+            image = load_image_from_url(image_url) 
+            image_label = Label(parent, image=image, width=171, height=171, background="white")
+            image_label.image = image
+            image_label.grid(row=0, column=0, rowspan=2, padx=8, pady=8)
+            image_label.bind("<Button-1>", lambda event, id=drink_id, name= drink_flavour, price= drink_price, description=drink_description, url = image_url: show_item_detail(event, id, name, price, description, url))
+            flavour_label = Label(frame, text=drink_flavour, font=('Helvetica', 15),bg="white", padx=8)
+            flavour_label.grid(row=2, column=0, sticky="w")
+            # flavour_label.bind("<Button-1>", self.show_product_detail)
+            price_label = Label(frame, text=f"${drink_price:.2f}", font=('Helvetica', 20), bg="white", padx=8)
+            price_label.grid(row=3, column=0, sticky="w")
+            price_label.bind("<Button-1>", lambda event, controller=controller, id=drink_id, name= drink_flavour, price= drink_price, description=drink_description, url = image_url: show_item_detail(event, controller, id, name, price, description, url))
 
-password_label = customtkinter.CTkLabel(window, text="Password", text_color="#11284c", font=entry_font)
-password_label.place(x=293.0, y=330.0)
+        
+        def show_item_detail(event, controller, drink_id, drink_name, drink_price, drink_description, drink_image):
+            # canvas1.pack_forget()
+            # scrollable_frame.pack_forget()
+            # scrollbar.pack_forget()
+            # top_canvas.pack_forget()
+            # canvas1.destroy()
+            # scrollable_frame.destroy()
+            # scrollbar.destroy()
+            # top_canvas.destroy()
+            # frame_screen.lower()
+            print("product")
+            print(self.canvas_container.winfo_width())
+            print(self.canvas_container.winfo_height())
+            
+            controller("item_detail_screen", drink_id, drink_name, drink_price, drink_description, drink_image)
+            # ItemDetailPage(self.canvas_container, drink_id ,drink_name, drink_price, drink_description, drink_image)
+        
 
-password_entry = customtkinter.CTkEntry(window, placeholder_text="Password", font=entry_font, placeholder_text_color='#11284c', border_color='#11284c',corner_radius=0,  height=64, width=440, textvariable=password, show=bullet)
-password_entry.place(x=293.0, y=360.0,)
+        row = 0
+        column = 0
+        for i, drink_data in enumerate(product_data):
+            drink = Product(
+                id = drink_data["_id"],
+                name=drink_data["name"],
+                description=drink_data["description"],
+                price=drink_data["price"],
+                image_url=drink_data["image"]
+            )
+            frame = Frame(self.drinks_frame, background="white", borderwidth=2, highlightbackground="red", highlightthickness=1) 
+            frame.grid(row=row, column=column, padx=10, pady=10, sticky="w")
+            
+            # Create and configure drink display elements
+            
+                # ... similar code for flavour_label and price_label ...
 
-password_error_label = Label(window, textvariable=password_error_message, bg="#FFFFFF", fg="red", font=("Arial", 10))
-password_error_label.place(x=293, y=425)  # Adjust placement as needed
+            create_widgets(frame, drink.id, drink.name, drink.price, drink.description, drink.image_url) 
+            # Call the function to create widgets inside drink_frame
+
+            # DrinkTile(
+            #     parent=frame, 
+            #     drink_id = drink.id,
+            #     drink_flavour=drink.name,
+            #     drink_price=drink.price,
+            #     drink_description=drink.description,
+            #     drink_image=drink.image_url
+            # )
+            
+            
+            column += 1
+            if column == 4:  # Or some other number of columns you prefer
+                row += 1
+                column = 0
+            print(drink.image_url)
+            print("row:" + str(row) + " " + "Column: " + str(column) )
 
 
-button_image_1 = PhotoImage(file=relative_to_assets("button_1.png"))
-button_submit = Button(image=button_image_1, borderwidth=0, highlightthickness=0, command=register, relief="flat" )
-button_submit.place(x=293.0, y=485.15826416015625, width=439.0, height=65.8499984741211)
+class ItemDetailPage(Frame):
+    def __init__(self, parent, controller, drink_id, drink_flavour, drink_price, drink_description, drink_image):
+        Frame.__init__(self, parent, bg="red")
+        self.drink_id = drink_id
+        self.drink_flavour = drink_flavour
+        self.drink_price = drink_price
+        self.drink_description = drink_description
+        self.drink_image = drink_image
+        self.quantity = 1
+        self.pack(fill="both", expand=True) 
 
-window.resizable(False, False)
-window.mainloop() 
+        # self.tkraise()
+        # self.pack(side="left", fill="both", expand=True)
+        
+        # Set main window to maximum screen
+        # screen_width = self.winfo_screenwidth()
+        # screen_height = self.winfo_screenheight()
+        # self.geometry(f"{screen_width}x{screen_height}+0+0")
+        
+        # self.geometry("1024x720")
+        # self.configure(bg = "#FFFFFF")
+        # root = Tk()
+        # canvas1 = Canvas(root)
+        # canvas1.pack()
+    
+        
+        self.canvas = Canvas(
+            self,
+            bg = "#FFFFFF",
+            height = 720,
+            width = 1024,
+            relief = "ridge"
+        )
+        
+        self.canvas.pack(fill="both", expand=True)
+        
+        self.canvas.create_rectangle(
+            0.0,
+            0.0,
+            1024.0,
+            560,
+            fill="#FF4438",
+        )
+
+        ################# Title ##############
+        self.title = f"{self.drink_flavour}"
+        self.title_text = Label(self.canvas, foreground="#FFFFFF", background="#FF4438",font=('Arial', 32), text=self.title, justify="center")
+        self.title_text.pack(pady=50, side="top", anchor="center")
+        
+        
+        def load_image_from_url(url):
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((250, 250), Image.ADAPTIVE)
+            return ImageTk.PhotoImage(img)
+        
+        self.image = load_image_from_url(drink_image) 
+        self.image_object = PhotoImage(file=relative_to_assets2("image_1.png"))
+        
+        self.canvas1 = Canvas(self.canvas, width=409, height=374)  # Adjust size if needed
+        self.canvas1.pack() 
+        self.image_label = Label(self.canvas1, image=self.image_object, bg="#FF4438")
+        self.image_label.image = self.image_object
+        self.canvas1.create_window(0, 0, window=self.image_label, anchor="nw")
+        
+        self.image_logo = Label(self.canvas1, image=self.image, width=250, height=250)
+        self.image_logo.image = self.image
+        self.canvas1.create_window(86, 50, window=self.image_logo, anchor="nw")
+        self.button_image_1 = PhotoImage(
+            file=relative_to_assets2("button_1.png")
+        )
+        button_1 = Button(
+            self.canvas,
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            bg="#FF4438",
+            command=lambda: controller("order_review_screen"),
+            relief="flat"
+        )
+        button_1.image = self.button_image_1
+        # canvas2.create_window(0, 0, window=button_1, anchor="w")
+        # button_1.place(
+        #     x=354.0,
+        #     y=600.0,
+        #     width=316.0545654296875,
+        #     height=66.37145233154297
+        # )
+        button_1.pack(padx=354, pady=64)
+
+        self.button_image_2 = PhotoImage(
+            file=relative_to_assets2("button_2.png")
+        )
+        # button_2 = Button(
+        #     self.canvas,
+        #     image=self.button_image_2,
+        #     borderwidth=0,
+        #     highlightthickness=0,
+        #     command= controller("product_menu_page"),
+        #     relief="flat"
+        # )
+        # button_2.image = self.button_image_2
+
+        # button_2.place(x=86, y=50)
+        self.button_image_2 = PhotoImage(file=relative_to_assets2("button_2.png"))
+        button_go_back = Button(self.canvas, image=self.button_image_2, borderwidth=0, highlightthickness=0, command=lambda: controller("product_menu_screen"), relief="flat" )
+        button_go_back.place(x=86.0, y=50)
+
+        self.canvas.create_text(
+            18.0,
+            236.0,
+            anchor="nw",
+            text="Medium Size Drink",
+            fill="#FFFFFF",
+            font=("Niradei Bold", 28 * -1)
+        )
+
+
+        self.canvas.create_text(
+            716.0,
+            252.0,
+            anchor="nw",
+            text="Sugar 70%",
+            fill="#FFFFFF",
+            font=("Niradei Regular", 28 * -1)
+        )
+  
+
+        self.canvas.create_text(
+            90.0,
+            378.0,
+            anchor="nw",
+            text="Stay Refreshing",
+            fill="#FFFFFF",
+            font=("Niradei Regular", 28 * -1)
+        )
+
+
+
+        self.canvas.create_text(
+            723.0,
+            394.0,
+            anchor="nw",
+            text="Fresh Milk",
+            fill="#FFFFFF",
+            font=("Niradei Bold", 28 * -1)
+        )
+
+        self.canvas.create_rectangle(
+            843.0,
+            0.0,
+            937.8163681030273,
+            122.78878021240234,
+            fill="#11284C",
+            outline="")
+
+        self.canvas.create_text(
+            865.0,
+            38.0,
+            anchor="nw",
+            text=f"${drink_price}",
+            fill="#FFFFFF",
+            font=("Niradei Bold", 36 * -1)
+        )
+    
+    def go_back(self):
+        print("Go back to menu")
+
+
+class OrderReviewPage(Frame):
+    def __init__(self, parent, controller, drink_id, drink_flavour, drink_price, drink_description, drink_image):
+        Frame.__init__(self, parent, bg="red")
+        self.drink_id = drink_id
+        self.drink_flavour = drink_flavour
+        self.drink_price = drink_price
+        self.drink_description = drink_description
+        self.drink_image = drink_image
+        self.quantity = 1
+        self.pack(fill="both", expand=True)
+        
+        self.canvas = Canvas(
+            self,
+            bg = "#FFFFFF",
+            height = 720,
+            width = 1024,
+            bd = 0,
+            highlightthickness = 0,
+            relief = "ridge"
+        )
+
+        self.canvas.place(x = 0, y = 0)
+        self.canvas.create_rectangle(
+            496.0,
+            0.0,
+            1024.0,
+            570.0,
+            fill="#FFFFFF",
+            outline="")
+
+        self.canvas.create_rectangle(
+            496.0,
+            0.0,
+            1024.0,
+            284.0,
+            fill="#FFFFFF",
+            outline="")
+
+        self.canvas.create_rectangle(
+            496.0,
+            0.0,
+            1024.0,
+            284.0,
+            fill="#11284C",
+            outline="")
+
+        self.button_image_1 = PhotoImage(
+            file=relative_to_assets3("button_1.png"))
+        button_1 = Button(
+            image=self.button_image_1,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: self.place_order(),
+            relief="flat"
+        )
+        button_1.place(
+            x=338.0,
+            y=610.0,
+            width=316.0545654296875,
+            height=66.37145233154297
+        )
+
+        self.image_image_1 = PhotoImage(
+            file=relative_to_assets3("image_1.png"))
+        self.canvas.create_image(
+            243.0,
+            338.0,
+            image=self.image_image_1
+        )
+
+        # drink image
+        def load_image_from_url(url):
+            response = requests.get(url)
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((340, 340), Image.ADAPTIVE)
+            return ImageTk.PhotoImage(img)
+        
+        self.drink_flavour_image = load_image_from_url(drink_image) 
+
+        # self.image_image_2 = PhotoImage(
+        #     file=relative_to_assets3("image_2.png"))
+        self.canvas.create_image(
+            244.0,
+            357.0,
+            image=self.drink_flavour_image
+        )
+
+        self.canvas.create_text(
+            536.0,
+            475.0,
+            anchor="nw",
+            text=f"Total ${self.drink_price:.2f}",
+            fill="#FF4438",
+            font=("Niradei Bold", 48 * -1)
+        )
+
+        self.canvas.create_text(
+            536.0,
+            311.0,
+            anchor="nw",
+            text="Payment Method",
+            fill="#000000",
+            font=("Niradei Bold", 24 * -1)
+        )
+
+        self.canvas.create_text(
+            576.0,
+            360.0,
+            anchor="nw",
+            text="Cash",
+            fill="#000000",
+            font=("Niradei Regular", 24 * -1)
+        )
+
+        self.canvas.create_rectangle(
+            536.0,
+            366.0,
+            560.0,
+            390.0,
+            fill="#000000",
+            outline="")
+
+        self.canvas.create_text(
+            576.0,
+            415.0,
+            anchor="nw",
+            text="ABA Scan",
+            fill="#000000",
+            font=("Niradei Regular", 24 * -1)
+        )
+
+        self.canvas.create_rectangle(
+            536.0,
+            421.0,
+            560.0,
+            445.0,
+            fill="#000000",
+            outline="")
+
+        self.canvas.create_rectangle(
+            0.0,
+            0.0618896484375,
+            1024.0,
+            128.0,
+            fill="#FF4438",
+            outline="")
+
+        self.canvas.create_text(
+            262.0,
+            35.0,
+            anchor="nw",
+            text="Current order",
+            fill="#FFFFFF",
+            font=("CADTMonoDisplay Regular", 48 * -1)
+        )
+
+        self.button_image_2 = PhotoImage(
+            file=relative_to_assets3("button_2.png"))
+        button_2 = Button(
+            image=self.button_image_2,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: print("button_2 clicked"),
+            relief="flat"
+        )
+        button_2.place(
+            x=86.0,
+            y=50.0,
+            width=45.0,
+            height=47.0
+        )
+
+        self.canvas.create_text(
+            544.0,
+            168.0,
+            anchor="nw",
+            text=self.drink_flavour,
+            fill="#FFFFFF",
+            font=("Niradei Bold", 28 * -1)
+        )
+
+        self.canvas.create_text(
+            544.0,
+            209.0,
+            anchor="nw",
+            text=f"${self.drink_price:.2f}",
+            fill="#FFFFFF",
+            font=("Niradei Regular", 24 * -1)
+        )
+
+        self.canvas.create_text(
+            945.0,
+            178.0,
+            anchor="nw",
+            text=f"x{self.quantity}",
+            fill="#FFFFFF",
+            font=("Niradei Bold", 28 * -1)
+        )
+
+    # Function to place an order
+    def place_order(self):
+        total_price = self.quantity * self.drink_price
+        OrderServices.placeOrder(self.drink_id, self.quantity, total_price)
+        print("success")
+        # psbar = ps.Processing()
+        # frame = tk.Frame(psbar, bg="white")
+
+class MainApplication(Tk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("1024x720")  # Configure the window
+        self.configure(bg="#FFFFFF")
+        self.entry_font = customtkinter.CTkFont(family="Arial", size=16)
+
+        self.login_screen = LoginScreen(self, self.show_screen)
+        # self.product_menu_screen = ProductMenuScreen(self, self.show_screen)
+        # self.item_detail_screen = ItemDetailScreen(self, self)
+
+        self.login_screen.pack()  # Show login initially
+        
+
+    def show_screen(self, screen_name, *args):
+        if screen_name == "login_screen":
+            self.login_screen.pack()
+            self.product_menu_screen.pack_forget()
+            if hasattr(self, "item_detail_screen"):
+                self.item_detail_screen.pack_forget() 
+        elif screen_name == "product_menu_screen":
+            self.product_menu_screen = ProductMenuScreen(self, self.show_screen)
+            self.login_screen.pack_forget()
+            self.product_menu_screen.pack()
+            self.item_detail_screen.pack_forget()
+            # if hasattr(self, "item_detail_screen"):
+            print("Back to Product Menu!")
+            # self.item_detail_screen.pack_forget()   
+        elif screen_name == "item_detail_screen":
+            print("Item Detail Page")
+            self.drink_id = args[0]
+            self.drink_name = args[1]
+            self.drink_price = args[2]
+            self.drink_description = args[3]
+            self.drink_image = args[4]
+            self.item_detail_screen = ItemDetailPage(self, self.show_screen, self.drink_id ,self.drink_name, self.drink_price, self.drink_description, self.drink_image)
+            # ItemDetailPage(self.canvas_container, drink_id ,drink_name, drink_price, drink_description, drink_image)
+           
+            self.login_screen.pack_forget()
+            self.product_menu_screen.pack_forget()
+            self.item_detail_screen.pack()
+        elif screen_name == "order_review_screen":
+            print("Order Screen")
+            self.order_review_screen = OrderReviewPage(self, self.show_screen, self.drink_id ,self.drink_name, self.drink_price, self.drink_description, self.drink_image)
+            self.login_screen.pack_forget()
+            self.product_menu_screen.pack_forget()
+            self.item_detail_screen.pack_forget()
+            self.order_review_screen.pack()
+
+            
+
+if __name__ == "__main__":
+    app = MainApplication()
+    app.mainloop()       
+
+
 
 
 
